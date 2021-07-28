@@ -29,7 +29,7 @@ public class GoogleSignInService {
         .requestEmail()
         .requestId()
         .requestProfile()
-//        .requestIdToken(BuildConfig.CLIENT_ID)
+        .requestIdToken(BuildConfig.CLIENT_ID)
         .build();
     client = GoogleSignIn.getClient(context, options);
   }
