@@ -34,6 +34,7 @@ public class GameViewModel extends AndroidViewModel implements LifecycleObserver
   private final MutableLiveData<Integer> poolSize;
   private final MutableLiveData<Boolean> sortedByTime;
   private final LiveData<List<GameWithGuesses>> scoreboard;
+  private final LiveData<List<GameWithGuesses>> history;
   private final MutableLiveData<Throwable> throwable;
   private final CompositeDisposable pending;
   private final SharedPreferences preferences;
@@ -48,11 +49,18 @@ public class GameViewModel extends AndroidViewModel implements LifecycleObserver
     codeLength = new MutableLiveData<>(getCodeLengthPref());
     poolSize = new MutableLiveData<>(getPoolSizePref());
     sortedByTime = new MutableLiveData<>(false);
-    ScoreboardFilterLiveData trigger =
+
+    ScoreboardFilterLiveData scoreboardTrigger =
         new ScoreboardFilterLiveData(codeLength, poolSize, sortedByTime);
-    scoreboard = Transformations.switchMap(trigger, (params) -> params.sortedByTime
+    scoreboard = Transformations.switchMap(scoreboardTrigger, (params) -> params.sortedByTime
         ? repository.getScoreboardTime(params.codeLength, params.poolSize)
         : repository.getScoreboardAttempts(params.codeLength, params.poolSize));
+
+    HistoryFilterLiveData historyTrigger =
+        new HistoryFilterLiveData(codeLength, poolSize);
+    history = Transformations.switchMap(historyTrigger, (params) ->
+        repository.getHistory(params.codeLength, params.poolSize));
+
     throwable = new MutableLiveData<>();
     pending = new CompositeDisposable();
     String[] emojis = application.getResources().getStringArray(R.array.emojis);
@@ -94,6 +102,10 @@ public class GameViewModel extends AndroidViewModel implements LifecycleObserver
 
   public LiveData<List<GameWithGuesses>> getScoreboard() {
     return scoreboard;
+  }
+
+  public LiveData<List<GameWithGuesses>> getHistory() {
+    return history;
   }
 
   public LiveData<Throwable> getThrowable() {
@@ -175,6 +187,18 @@ public class GameViewModel extends AndroidViewModel implements LifecycleObserver
 
   }
 
+  private static class HistoryFilterLiveData extends MediatorLiveData<HistoryParams> {
+
+    @SuppressWarnings("ConstantConditions")
+    public HistoryFilterLiveData(LiveData<Integer> codeLength, LiveData<Integer> poolSize) {
+      addSource(codeLength, (length) ->
+          setValue(new HistoryParams(length, poolSize.getValue())));
+      addSource(poolSize, (size) ->
+          setValue(new HistoryParams(codeLength.getValue(), size)));
+    }
+
+  }
+
   private static class ScoreboardParams {
 
     private final int codeLength;
@@ -185,6 +209,18 @@ public class GameViewModel extends AndroidViewModel implements LifecycleObserver
       this.codeLength = codeLength;
       this.poolSize = poolSize;
       this.sortedByTime = sortedByTime;
+    }
+
+  }
+
+  private static class HistoryParams {
+
+    private final int codeLength;
+    private final int poolSize;
+
+    private HistoryParams(int codeLength, int poolSize) {
+      this.codeLength = codeLength;
+      this.poolSize = poolSize;
     }
 
   }
