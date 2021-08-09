@@ -1,6 +1,5 @@
-plugins {
-    id 'com.android.application'
-}
+apply plugin: 'com.android.application'
+apply plugin: 'androidx.navigation.safeargs'
 
 static def getProperty(String filename, String property) {
     Properties properties = new Properties()
@@ -27,7 +26,7 @@ android {
 
         def connectionProperties = "$projectDir/../../../services/codebreaker.properties"
 
-        buildConfigField 'String', "CLIENT_ID",
+        buildConfigField 'String', 'CLIENT_ID',
                 quoted(getProperty(connectionProperties, 'client_id'))
 
         javaCompileOptions {
@@ -105,7 +104,7 @@ dependencies {
     // OkHttp library
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.1'
 
-    //implementation
+    // Google Sign-In library
     implementation 'com.google.android.gms:play-services-auth:19.2.0'
 
     // Stetho (inspection) library
