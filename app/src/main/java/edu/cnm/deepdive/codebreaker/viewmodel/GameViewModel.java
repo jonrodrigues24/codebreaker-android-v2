@@ -49,18 +49,15 @@ public class GameViewModel extends AndroidViewModel implements LifecycleObserver
     codeLength = new MutableLiveData<>(getCodeLengthPref());
     poolSize = new MutableLiveData<>(getPoolSizePref());
     sortedByTime = new MutableLiveData<>(false);
-
     ScoreboardFilterLiveData scoreboardTrigger =
         new ScoreboardFilterLiveData(codeLength, poolSize, sortedByTime);
     scoreboard = Transformations.switchMap(scoreboardTrigger, (params) -> params.sortedByTime
         ? repository.getScoreboardTime(params.codeLength, params.poolSize)
         : repository.getScoreboardAttempts(params.codeLength, params.poolSize));
-
     HistoryFilterLiveData historyTrigger =
         new HistoryFilterLiveData(codeLength, poolSize);
     history = Transformations.switchMap(historyTrigger, (params) ->
         repository.getHistory(params.codeLength, params.poolSize));
-
     throwable = new MutableLiveData<>();
     pending = new CompositeDisposable();
     String[] emojis = application.getResources().getStringArray(R.array.emojis);
@@ -111,7 +108,7 @@ public class GameViewModel extends AndroidViewModel implements LifecycleObserver
   public LiveData<Throwable> getThrowable() {
     return throwable;
   }
-  
+
   public void startGame() {
     throwable.setValue(null);
     Game game = new Game();
