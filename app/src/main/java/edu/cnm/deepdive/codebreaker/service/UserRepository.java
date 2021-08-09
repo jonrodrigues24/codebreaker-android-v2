@@ -3,6 +3,7 @@ package edu.cnm.deepdive.codebreaker.service;
 import android.content.Context;
 import edu.cnm.deepdive.codebreaker.model.dao.UserDao;
 import edu.cnm.deepdive.codebreaker.model.entity.User;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
 
@@ -16,6 +17,15 @@ public class UserRepository {
     this.context = context;
     userDao =  CodebreakerDatabase.getInstance().getUserDao();
   }
+
+  public Completable save(User user) {
+    return userDao
+        .update(user)
+        .ignoreElement()
+        .subscribeOn(Schedulers.io());
+  }
+
+
 
   public Single<User> getOrCreate(String oauthKey, String displayName) {
     return userDao
