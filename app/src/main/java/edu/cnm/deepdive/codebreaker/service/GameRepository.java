@@ -101,4 +101,8 @@ public class GameRepository {
     return gameDao.selectTopScoresByTime(codeLength, poolSize);
   }
 
+  public LiveData<List<GameWithGuesses>> getHistory(int codeLength, int poolSize) {
+    return gameDao.selectHistory(codeLength, poolSize);
+  }
+
 }
